@@ -55,6 +55,8 @@ def parse_article_id(r):
 settings = read_settings("cookies.json")
 jar = requests.cookies.RequestsCookieJar()
 jar.set(settings["name"],settings["value"],domain="darkdiary.ru",path="/")
+record_timeout = settings["page-timeout"]
+page_timeout = settings["record-timeout"]
 print jar
 
 login = sys.argv[1]
@@ -62,9 +64,9 @@ url = "http://darkdiary.ru/users/" + login + "/"
 pages = get_pages(url,jar)
 
 ids = []
-if query_yes_no("Login is " + login + "\nPages range:\n" + pages[0] + "\n" + pages[-1] + "\n\n Is the data above correct?"):
-	begin = int(pages[0].split("=")[1])
-	end = int(pages[-1].split("=")[1])
+begin = int(pages[0].split("=")[1])
+end = int(pages[-1].split("=")[1])
+if query_yes_no("Login is " + login + "\nPages range:\n" + pages[0] + "\n" + pages[-1] + "\n\n Is the data above correct?" + "\n\n It will take approx. " + str(len(range(begin,end+1))*record_timeout*page_timeout/60) + " minutes"):
 	ids = range(begin,end+1)
 
 pages = []
@@ -78,6 +80,6 @@ for i in ids:
 		link = "http://darkdiary.ru/users/" + login + "/" + rec_id + "/comment/"
 		rp.parse_record(link,jar)
 		print "Parsing " + link + "\nOK, waiting 10 seconds..."
-		time.sleep(10)
+		time.sleep(record_timeout)
 	print "Parsing page " + str(i) + "\nOK, waiting 15 seconds..."
-	time.sleep(15)
+	time.sleep(page_timeout)
